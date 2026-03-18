@@ -1,0 +1,42 @@
+<%- include('../layouts/main', { body: `
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-file-medical"></i> Medical Records</h2>
+</div>
+
+${records.length === 0 ? `
+<div class="text-center py-5">
+    <i class="bi bi-file-medical display-1 text-muted"></i>
+    <h4 class="mt-3">No Medical Records</h4>
+    <p class="text-muted">You haven't added any medical records yet.<br>Complete an appointment and add a medical record from the appointment details page.</p>
+</div>
+` : `
+<div class="table-responsive">
+    <table class="table table-hover bg-white shadow-sm">
+        <thead class="table-light">
+            <tr>
+                <th>Date</th>
+                <th>Pet</th>
+                <th>Owner</th>
+                <th>Diagnosis</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${records.map(record => `
+            <tr>
+                <td>${record.record_date}</td>
+                <td>${record.pet_name} <small class="text-muted">(${record.pet_species})</small></td>
+                <td>${record.owner_first_name} ${record.owner_last_name}</td>
+                <td>${record.diagnosis || '-'}</td>
+                <td>
+                    <a href="/doctor/records/${record.id}/edit" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-pencil"></i> Edit
+                    </a>
+                </td>
+            </tr>
+            `).join('')}
+        </tbody>
+    </table>
+</div>
+`}
+` }) %>

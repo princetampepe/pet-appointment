@@ -1,0 +1,159 @@
+<%- include('../layouts/main', { body: `
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-speedometer2"></i> Doctor Dashboard</h2>
+    <span class="badge bg-primary fs-6">Dr. ${user.first_name} ${user.last_name}</span>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-warning text-dark">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="opacity-75">Pending</h6>
+                        <h2 class="mb-0">${stats.pending}</h2>
+                    </div>
+                    <i class="bi bi-clock-history fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-white-50">Confirmed</h6>
+                        <h2 class="mb-0">${stats.confirmed}</h2>
+                    </div>
+                    <i class="bi bi-check-circle fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-white-50">Today</h6>
+                        <h2 class="mb-0">${stats.today}</h2>
+                    </div>
+                    <i class="bi bi-calendar-day fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-white-50">Total</h6>
+                        <h2 class="mb-0">${stats.total}</h2>
+                    </div>
+                    <i class="bi bi-calendar-check fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-clock-history text-warning"></i> Pending Appointments</h5>
+                <a href="/doctor/appointments/pending" class="btn btn-sm btn-outline-warning">View All</a>
+            </div>
+            <div class="card-body">
+                ${pendingAppointments.length === 0 ? '<p class="text-muted text-center py-4">No pending appointments</p>' : ''}
+                <div class="list-group list-group-flush">
+                    ${pendingAppointments.slice(0, 5).map(apt => `
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <strong>${apt.pet_name}</strong> (${apt.pet_species})<br>
+                                <small class="text-muted">Owner: ${apt.patient_first_name} ${apt.patient_last_name}</small><br>
+                                <small><i class="bi bi-calendar"></i> ${apt.appointment_date} at ${apt.appointment_time}</small><br>
+                                <small><i class="bi bi-clipboard"></i> ${apt.reason}</small>
+                            </div>
+                            <form action="/doctor/appointments/${apt.id}/confirm" method="POST">
+                                <button type="submit" class="btn btn-sm btn-success">
+                                    <i class="bi bi-check"></i> Confirm
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-calendar-day text-info"></i> Today's Appointments</h5>
+            </div>
+            <div class="card-body">
+                ${todayAppointments.length === 0 ? '<p class="text-muted text-center py-4">No appointments scheduled for today</p>' : ''}
+                <div class="list-group list-group-flush">
+                    ${todayAppointments.map(apt => `
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <strong>${apt.appointment_time}</strong> - ${apt.pet_name} (${apt.pet_species})<br>
+                                <small class="text-muted">Owner: ${apt.patient_first_name} ${apt.patient_last_name}</small><br>
+                                <small><i class="bi bi-clipboard"></i> ${apt.reason}</small>
+                            </div>
+                            <span class="badge bg-${apt.status === 'pending' ? 'warning' : apt.status === 'confirmed' ? 'success' : apt.status === 'completed' ? 'info' : 'danger'}">
+                                ${apt.status}
+                            </span>
+                        </div>
+                    </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-lightning text-warning"></i> Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <a href="/doctor/appointments" class="text-decoration-none">
+                            <i class="bi bi-calendar-check display-6 text-primary"></i>
+                            <p class="mt-2 mb-0">All Appointments</p>
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="/doctor/appointments/pending" class="text-decoration-none">
+                            <i class="bi bi-clock-history display-6 text-warning"></i>
+                            <p class="mt-2 mb-0">Pending</p>
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="/doctor/records" class="text-decoration-none">
+                            <i class="bi bi-file-medical display-6 text-success"></i>
+                            <p class="mt-2 mb-0">Medical Records</p>
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="/profile" class="text-decoration-none">
+                            <i class="bi bi-person-gear display-6 text-info"></i>
+                            <p class="mt-2 mb-0">Profile & Availability</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+` }) %>

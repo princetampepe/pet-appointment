@@ -1,0 +1,86 @@
+<%- include('../layouts/main', { body: `
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-speedometer2"></i> Dashboard</h2>
+    <a href="/patient/appointments/book" class="btn btn-primary">
+        <i class="bi bi-calendar-plus"></i> Book Appointment
+    </a>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-white-50">My Pets</h6>
+                        <h2 class="mb-0">${pets.length}</h2>
+                    </div>
+                    <i class="bi bi-heart fs-1 opacity-50"></i>
+                </div>
+                <a href="/patient/pets" class="text-white">View all <i class="bi bi-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-white-50">Total Appointments</h6>
+                        <h2 class="mb-0">${appointments.length}</h2>
+                    </div>
+                    <i class="bi bi-calendar-check fs-1 opacity-50"></i>
+                </div>
+                <a href="/patient/appointments" class="text-white">View all <i class="bi bi-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm bg-warning text-dark">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-dark opacity-75">Pending</h6>
+                        <h2 class="mb-0">${appointments.filter(a => a.status === 'pending').length}</h2>
+                    </div>
+                    <i class="bi bi-clock-history fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-heart"></i> My Pets</h5>
+                <a href="/patient/pets/add" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-plus"></i> Add Pet
+                </a>
+            </div>
+            <div class="card-body">
+                ${pets.length === 0 ? '<p class="text-muted text-center py-4">No pets registered yet. <a href="/patient/pets/add">Add your first pet</a></p>' : ''}
+                <div class="list-group list-group-flush">
+                    ${pets.slice(0, 5).map(pet => '<div class="list-group-item d-flex justify-content-between align-items-center"><div><i class="bi bi-heart-fill text-danger me-2"></i><strong>' + pet.name + '</strong><br><small class="text-muted">' + pet.species + (pet.breed ? ' - ' + pet.breed : '') + '</small></div></div>').join('')}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-calendar-check"></i> Recent Appointments</h5>
+                <a href="/patient/appointments" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+                ${appointments.length === 0 ? '<p class="text-muted text-center py-4">No appointments yet. <a href="/patient/appointments/book">Book your first appointment</a></p>' : ''}
+                <div class="list-group list-group-flush">
+                    ${appointments.slice(0, 5).map(apt => '<div class="list-group-item"><div class="d-flex justify-content-between"><div><strong>' + apt.pet_name + '</strong><br><small class="text-muted">' + apt.appointment_date + ' at ' + apt.appointment_time + '</small><br><small>Dr. ' + apt.doctor_first_name + ' ' + apt.doctor_last_name + '</small></div><span class="badge bg-' + (apt.status === 'pending' ? 'warning' : apt.status === 'confirmed' ? 'success' : apt.status === 'completed' ? 'info' : 'danger') + '">' + apt.status + '</span></div></div>').join('')}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+` }) %>

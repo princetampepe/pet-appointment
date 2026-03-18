@@ -1,0 +1,60 @@
+<%- include('../layouts/main', { body: `
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-heart"></i> My Pets</h2>
+    <a href="/patient/pets/add" class="btn btn-primary">
+        <i class="bi bi-plus"></i> Add New Pet
+    </a>
+</div>
+
+${pets.length === 0 ? `
+<div class="text-center py-5">
+    <i class="bi bi-heart display-1 text-muted"></i>
+    <h4 class="mt-3">No Pets Registered</h4>
+    <p class="text-muted">You haven't registered any pets yet.</p>
+    <a href="/patient/pets/add" class="btn btn-primary">
+        <i class="bi bi-plus"></i> Add Your First Pet
+    </a>
+</div>
+` : `
+<div class="row g-4">
+    ${pets.map(pet => `
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="pet-avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                        <i class="bi bi-heart-fill"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0">${pet.name}</h5>
+                        <small class="text-muted">${pet.species}</small>
+                    </div>
+                </div>
+                <ul class="list-unstyled mb-0">
+                    ${pet.breed ? '<li><strong>Breed:</strong> ' + pet.breed + '</li>' : ''}
+                    ${pet.age ? '<li><strong>Age:</strong> ' + pet.age + ' years</li>' : ''}
+                    ${pet.weight ? '<li><strong>Weight:</strong> ' + pet.weight + ' kg</li>' : ''}
+                    ${pet.notes ? '<li class="mt-2"><small class="text-muted">' + pet.notes + '</small></li>' : ''}
+                </ul>
+            </div>
+            <div class="card-footer bg-white border-0">
+                <div class="d-flex gap-2 mb-2">
+                    <a href="/patient/pets/${pet.id}/records" class="btn btn-sm btn-outline-info flex-fill">
+                        <i class="bi bi-file-medical"></i> Records
+                    </a>
+                    <a href="/patient/pets/edit/${pet.id}" class="btn btn-sm btn-outline-primary flex-fill">
+                        <i class="bi bi-pencil"></i> Edit
+                    </a>
+                </div>
+                <form action="/patient/pets/delete/${pet.id}" method="POST" onsubmit="return confirm('Are you sure you want to remove this pet?')">
+                    <button type="submit" class="btn btn-sm btn-outline-danger w-100">
+                        <i class="bi bi-trash"></i> Remove
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    `).join('')}
+</div>
+`}
+` }) %>

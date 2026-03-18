@@ -1,0 +1,120 @@
+<%- include('../layouts/main', { body: `
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-calendar-plus"></i> Book Appointment</h5>
+            </div>
+            <div class="card-body p-4">
+                ${pets.length === 0 ? `
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i> You need to add a pet before booking an appointment.
+                    <a href="/patient/pets/add" class="alert-link">Add a pet now</a>
+                </div>
+                ` : `
+                ${doctors.length === 0 ? `
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i> No doctors are currently available. Please try again later.
+                </div>
+                ` : `
+                <form action="/patient/appointments/book" method="POST" id="bookingForm">
+                    <div class="mb-3">
+                        <label for="pet_id" class="form-label">Select Pet *</label>
+                        <select class="form-select" id="pet_id" name="pet_id" required>
+                            <option value="">Choose your pet</option>
+                            ${pets.map(pet => '<option value="' + pet.id + '">' + pet.name + ' (' + pet.species + ')' + '</option>').join('')}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="doctor_id" class="form-label">Select Doctor *</label>
+                        <select class="form-select" id="doctor_id" name="doctor_id" required>
+                            <option value="">Choose a doctor</option>
+                            ${doctors.map(doc => '<option value="' + doc.id + '">Dr. ' + doc.first_name + ' ' + doc.last_name + (doc.specialization ? ' - ' + doc.specialization : '') + '</option>').join('')}
+                        </select>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="appointment_date" class="form-label">Date *</label>
+                            <input type="date" class="form-control" id="appointment_date" name="appointment_date" required min="${new Date().toISOString().split('T')[0]}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="appointment_time" class="form-label">Time *</label>
+                            <select class="form-select" id="appointment_time" name="appointment_time" required disabled>
+                                <option value="">Select date and doctor first</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="reason" class="form-label">Reason for Visit *</label>
+                        <select class="form-select" id="reason" name="reason" required>
+                            <option value="">Select reason</option>
+                            <option value="General Checkup">General Checkup</option>
+                            <option value="Vaccination">Vaccination</option>
+                            <option value="Illness/Injury">Illness/Injury</option>
+                            <option value="Surgery Consultation">Surgery Consultation</option>
+                            <option value="Dental Care">Dental Care</option>
+                            <option value="Grooming">Grooming</option>
+                            <option value="Follow-up Visit">Follow-up Visit</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="notes" class="form-label">Additional Notes</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Any additional information about your pet's condition or concerns"></textarea>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-calendar-check"></i> Book Appointment
+                        </button>
+                        <a href="/patient/appointments" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+                
+                <script>
+                    const doctorSelect = document.getElementById('doctor_id');
+                    const dateInput = document.getElementById('appointment_date');
+                    const timeSelect = document.getElementById('appointment_time');
+                    
+                    async function loadAvailableSlots() {
+                        const doctorId = doctorSelect.value;
+                        const date = dateInput.value;
+                        
+                        if (!doctorId || !date) {
+                            timeSelect.disabled = true;
+                            timeSelect.innerHTML = '<option value="">Select date and doctor first</option>';
+                            return;
+                        }
+                        
+                        try {
+                            const response = await fetch('/patient/api/available-slots?doctor_id=' + doctorId + '&date=' + date);
+                            const data = await response.json();
+                            
+                            if (data.availableSlots && data.availableSlots.length > 0) {
+                                timeSelect.disabled = false;
+                                timeSelect.innerHTML = '<option value="">Select a time</option>' + 
+                                    data.availableSlots.map(slot => '<option value="' + slot + '">' + slot + '</option>').join('');
+                            } else {
+                                timeSelect.disabled = true;
+                                timeSelect.innerHTML = '<option value="">No available slots for this date</option>';
+                            }
+                        } catch (error) {
+                            console.error('Error loading slots:', error);
+                            timeSelect.innerHTML = '<option value="">Error loading slots</option>';
+                        }
+                    }
+                    
+                    doctorSelect.addEventListener('change', loadAvailableSlots);
+                    dateInput.addEventListener('change', loadAvailableSlots);
+                </script>
+                `}
+                `}
+            </div>
+        </div>
+    </div>
+</div>
+` }) %>

@@ -1,0 +1,166 @@
+<%- include('../layouts/main', { body: `
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-person"></i> Profile Information</h5>
+            </div>
+            <div class="card-body">
+                <form action="/profile/update" method="POST">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="first_name" class="form-label">First Name *</label>
+                            <input type="text" class="form-control" id="first_name" name="first_name" value="${profile.first_name}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="last_name" class="form-label">Last Name *</label>
+                            <input type="text" class="form-control" id="last_name" name="last_name" value="${profile.last_name}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" class="form-control" id="email" value="${profile.email}" disabled>
+                        <small class="text-muted">Email cannot be changed</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control" id="phone" name="phone" value="${profile.phone || ''}">
+                    </div>
+                    
+                    ${profile.role === 'doctor' ? `
+                    <div class="mb-3">
+                        <label for="specialization" class="form-label">Specialization</label>
+                        <select class="form-select" id="specialization" name="specialization">
+                            <option value="">General Practitioner</option>
+                            <option value="Surgery" ${profile.specialization === 'Surgery' ? 'selected' : ''}>Surgery</option>
+                            <option value="Dentistry" ${profile.specialization === 'Dentistry' ? 'selected' : ''}>Dentistry</option>
+                            <option value="Dermatology" ${profile.specialization === 'Dermatology' ? 'selected' : ''}>Dermatology</option>
+                            <option value="Cardiology" ${profile.specialization === 'Cardiology' ? 'selected' : ''}>Cardiology</option>
+                            <option value="Ophthalmology" ${profile.specialization === 'Ophthalmology' ? 'selected' : ''}>Ophthalmology</option>
+                            <option value="Orthopedics" ${profile.specialization === 'Orthopedics' ? 'selected' : ''}>Orthopedics</option>
+                            <option value="Internal Medicine" ${profile.specialization === 'Internal Medicine' ? 'selected' : ''}>Internal Medicine</option>
+                            <option value="Emergency Care" ${profile.specialization === 'Emergency Care' ? 'selected' : ''}>Emergency Care</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="bio" class="form-label">Bio / About</label>
+                        <textarea class="form-control" id="bio" name="bio" rows="3" placeholder="Tell patients about yourself...">${profile.bio || ''}</textarea>
+                    </div>
+                    ` : ''}
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Update Profile
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-key"></i> Change Password</h5>
+            </div>
+            <div class="card-body">
+                <form action="/profile/change-password" method="POST">
+                    <div class="mb-3">
+                        <label for="current_password" class="form-label">Current Password *</label>
+                        <input type="password" class="form-control" id="current_password" name="current_password" required>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="new_password" class="form-label">New Password *</label>
+                            <input type="password" class="form-control" id="new_password" name="new_password" required minlength="6">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="confirm_password" class="form-label">Confirm New Password *</label>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-key"></i> Change Password
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body text-center">
+                <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
+                    <i class="bi bi-person"></i>
+                </div>
+                <h5>${profile.first_name} ${profile.last_name}</h5>
+                <span class="badge bg-${profile.role === 'doctor' ? 'primary' : profile.role === 'secretary' ? 'success' : 'info'}">${profile.role}</span>
+                ${profile.role === 'doctor' && profile.specialization ? '<p class="text-muted mt-2 mb-0">' + profile.specialization + '</p>' : ''}
+            </div>
+        </div>
+        
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h6><i class="bi bi-info-circle"></i> Account Info</h6>
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2"><strong>Email:</strong> ${profile.email}</li>
+                    <li class="mb-2"><strong>Phone:</strong> ${profile.phone || 'Not set'}</li>
+                    <li><strong>Member since:</strong> ${new Date(profile.created_at).toLocaleDateString()}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+${profile.role === 'doctor' ? `
+<div class="card border-0 shadow-sm mt-4">
+    <div class="card-header bg-white">
+        <h5 class="mb-0"><i class="bi bi-calendar-week"></i> Availability Schedule</h5>
+    </div>
+    <div class="card-body">
+        <form action="/profile/availability" method="POST">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Day</th>
+                            <th>Available</th>
+                            <th>Start Time</th>
+                            <th>End Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((day, index) => {
+                            const avail = availability.find(a => a.day_of_week === index);
+                            const isAvailable = avail ? avail.is_available : (index >= 1 && index <= 5);
+                            const startTime = avail ? avail.start_time : '09:00';
+                            const endTime = avail ? avail.end_time : '17:00';
+                            return `
+                            <tr>
+                                <td><strong>${day}</strong></td>
+                                <td>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="available_${day.toLowerCase()}" ${isAvailable ? 'checked' : ''}>
+                                    </div>
+                                </td>
+                                <td>
+                                    <input type="time" class="form-control form-control-sm" name="start_${day.toLowerCase()}" value="${startTime}">
+                                </td>
+                                <td>
+                                    <input type="time" class="form-control form-control-sm" name="end_${day.toLowerCase()}" value="${endTime}">
+                                </td>
+                            </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-save"></i> Save Availability
+            </button>
+        </form>
+    </div>
+</div>
+` : ''}
+` }) %>

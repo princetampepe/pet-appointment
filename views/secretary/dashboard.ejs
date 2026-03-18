@@ -1,0 +1,145 @@
+<%- include('../layouts/main', { body: `
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-speedometer2"></i> Secretary Dashboard</h2>
+    <span class="text-muted">Welcome, ${user.first_name} ${user.last_name}</span>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-2">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body">
+                <h3 class="text-primary mb-0">${stats.total}</h3>
+                <small class="text-muted">Total</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card border-0 shadow-sm text-center bg-warning bg-opacity-10">
+            <div class="card-body">
+                <h3 class="text-warning mb-0">${stats.pending}</h3>
+                <small class="text-muted">Pending</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card border-0 shadow-sm text-center bg-success bg-opacity-10">
+            <div class="card-body">
+                <h3 class="text-success mb-0">${stats.confirmed}</h3>
+                <small class="text-muted">Confirmed</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card border-0 shadow-sm text-center bg-info bg-opacity-10">
+            <div class="card-body">
+                <h3 class="text-info mb-0">${stats.completed}</h3>
+                <small class="text-muted">Completed</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card border-0 shadow-sm text-center bg-danger bg-opacity-10">
+            <div class="card-body">
+                <h3 class="text-danger mb-0">${stats.cancelled}</h3>
+                <small class="text-muted">Cancelled</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card border-0 shadow-sm text-center bg-primary bg-opacity-10">
+            <div class="card-body">
+                <h3 class="text-primary mb-0">${doctors.length}</h3>
+                <small class="text-muted">Doctors</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-calendar-day text-info"></i> Today's Appointments</h5>
+                <a href="/secretary/schedule" class="btn btn-sm btn-outline-info">View Schedule</a>
+            </div>
+            <div class="card-body">
+                ${todayAppointments.length === 0 ? '<p class="text-muted text-center py-4">No appointments scheduled for today</p>' : ''}
+                <div class="list-group list-group-flush">
+                    ${todayAppointments.slice(0, 5).map(apt => `
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <strong>${apt.appointment_time}</strong> - ${apt.pet_name}<br>
+                                <small class="text-muted">Patient: ${apt.patient_first_name} ${apt.patient_last_name}</small><br>
+                                <small>Dr. ${apt.doctor_first_name} ${apt.doctor_last_name}</small>
+                            </div>
+                            <span class="badge bg-${apt.status === 'pending' ? 'warning' : apt.status === 'confirmed' ? 'success' : apt.status === 'completed' ? 'info' : 'danger'}">
+                                ${apt.status}
+                            </span>
+                        </div>
+                    </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-clock-history text-warning"></i> Pending Appointments</h5>
+                <a href="/secretary/appointments?status=pending" class="btn btn-sm btn-outline-warning">View All</a>
+            </div>
+            <div class="card-body">
+                ${pendingAppointments.length === 0 ? '<p class="text-muted text-center py-4">No pending appointments</p>' : ''}
+                <div class="list-group list-group-flush">
+                    ${pendingAppointments.slice(0, 5).map(apt => `
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <strong>${apt.pet_name}</strong> - ${apt.appointment_date}<br>
+                                <small class="text-muted">Patient: ${apt.patient_first_name} ${apt.patient_last_name}</small><br>
+                                <small>Dr. ${apt.doctor_first_name} ${apt.doctor_last_name}</small>
+                            </div>
+                            <form action="/secretary/appointments/${apt.id}/confirm" method="POST">
+                                <button type="submit" class="btn btn-sm btn-success">
+                                    <i class="bi bi-check"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-people"></i> Doctors</h5>
+                <a href="/secretary/staff" class="btn btn-sm btn-outline-primary">Manage Staff</a>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    ${doctors.map(doc => `
+                    <div class="col-md-4 col-lg-3 mb-3">
+                        <div class="card border">
+                            <div class="card-body text-center">
+                                <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" style="width: 50px; height: 50px;">
+                                    <i class="bi bi-person fs-4"></i>
+                                </div>
+                                <h6 class="mb-0">Dr. ${doc.first_name} ${doc.last_name}</h6>
+                                <small class="text-muted">${doc.specialization || 'General Practitioner'}</small>
+                            </div>
+                        </div>
+                    </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+` }) %>

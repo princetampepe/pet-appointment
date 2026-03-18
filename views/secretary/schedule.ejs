@@ -1,0 +1,85 @@
+<%- include('../layouts/main', { body: `
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-calendar3"></i> Schedule Overview</h2>
+    <a href="/secretary/appointments" class="btn btn-outline-primary">
+        <i class="bi bi-list"></i> List View
+    </a>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-4">
+                <label class="form-label">Select Date</label>
+                <input type="date" class="form-control" id="scheduleDate" value="${new Date().toISOString().split('T')[0]}" onchange="filterByDate()">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Filter by Doctor</label>
+                <select class="form-select" id="doctorFilter" onchange="filterByDoctor()">
+                    <option value="">All Doctors</option>
+                    ${doctors.map(doc => '<option value="' + doc.id + '">Dr. ' + doc.first_name + ' ' + doc.last_name + '</option>').join('')}
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4" id="scheduleView">
+    ${doctors.map(doc => `
+    <div class="col-lg-4 doctor-schedule" data-doctor-id="${doc.id}">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-primary text-white">
+                <h6 class="mb-0"><i class="bi bi-person-badge"></i> Dr. ${doc.first_name} ${doc.last_name}</h6>
+                <small>${doc.specialization || 'General Practitioner'}</small>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush doctor-appointments">
+                    ${appointments.filter(apt => apt.doctor_id === doc.id).length === 0 ? 
+                        '<p class="text-muted text-center py-3">No appointments</p>' : 
+                        appointments.filter(apt => apt.doctor_id === doc.id).slice(0, 8).map(apt => `
+                        <div class="list-group-item appointment-item" data-date="${apt.appointment_date}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <span class="badge bg-light text-dark">${apt.appointment_time}</span>
+                                    <strong class="ms-2">${apt.pet_name}</strong><br>
+                                    <small class="text-muted">${apt.appointment_date}</small><br>
+                                    <small>${apt.patient_first_name} ${apt.patient_last_name}</small>
+                                </div>
+                                <span class="badge bg-${apt.status === 'pending' ? 'warning' : apt.status === 'confirmed' ? 'success' : apt.status === 'completed' ? 'info' : 'danger'}">
+                                    ${apt.status}
+                                </span>
+                            </div>
+                        </div>
+                        `).join('')
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    `).join('')}
+</div>
+
+<script>
+    function filterByDate() {
+        const selectedDate = document.getElementById('scheduleDate').value;
+        document.querySelectorAll('.appointment-item').forEach(item => {
+            if (selectedDate && item.dataset.date !== selectedDate) {
+                item.style.display = 'none';
+            } else {
+                item.style.display = 'block';
+            }
+        });
+    }
+    
+    function filterByDoctor() {
+        const selectedDoctor = document.getElementById('doctorFilter').value;
+        document.querySelectorAll('.doctor-schedule').forEach(schedule => {
+            if (selectedDoctor && schedule.dataset.doctorId !== selectedDoctor) {
+                schedule.style.display = 'none';
+            } else {
+                schedule.style.display = 'block';
+            }
+        });
+    }
+</script>
+` }) %>

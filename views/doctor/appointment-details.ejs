@@ -1,0 +1,112 @@
+<%- include('../layouts/main', { body: `
+<div class="mb-4">
+    <a href="/doctor/appointments" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Back to Appointments
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-calendar-check"></i> Appointment Details</h5>
+                <span class="badge bg-${appointment.status === 'pending' ? 'warning' : appointment.status === 'confirmed' ? 'success' : appointment.status === 'completed' ? 'info' : 'danger'} fs-6">
+                    ${appointment.status}
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <h6 class="text-muted mb-2">Date & Time</h6>
+                        <p class="fs-5 mb-0">
+                            <i class="bi bi-calendar text-primary"></i> ${appointment.appointment_date}<br>
+                            <i class="bi bi-clock text-primary"></i> ${appointment.appointment_time}
+                        </p>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <h6 class="text-muted mb-2">Reason for Visit</h6>
+                        <p class="fs-5 mb-0">${appointment.reason}</p>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <h6 class="text-muted mb-2"><i class="bi bi-heart"></i> Pet Information</h6>
+                        <p class="mb-1"><strong>Name:</strong> ${appointment.pet_name}</p>
+                        <p class="mb-1"><strong>Species:</strong> ${appointment.pet_species}</p>
+                        ${appointment.pet_breed ? '<p class="mb-0"><strong>Breed:</strong> ' + appointment.pet_breed + '</p>' : ''}
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <h6 class="text-muted mb-2"><i class="bi bi-person"></i> Owner Information</h6>
+                        <p class="mb-1"><strong>Name:</strong> ${appointment.patient_first_name} ${appointment.patient_last_name}</p>
+                        <p class="mb-1"><strong>Email:</strong> ${appointment.patient_email}</p>
+                        <p class="mb-0"><strong>Phone:</strong> ${appointment.patient_phone || 'N/A'}</p>
+                    </div>
+                </div>
+                
+                ${appointment.notes ? `
+                <hr>
+                <h6 class="text-muted mb-2"><i class="bi bi-sticky"></i> Notes</h6>
+                <p class="mb-0">${appointment.notes}</p>
+                ` : ''}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-gear"></i> Actions</h5>
+            </div>
+            <div class="card-body">
+                ${appointment.status === 'pending' ? `
+                <form action="/doctor/appointments/${appointment.id}/confirm" method="POST" class="mb-2">
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="bi bi-check-circle"></i> Confirm Appointment
+                    </button>
+                </form>
+                <form action="/doctor/appointments/${appointment.id}/cancel" method="POST" onsubmit="return confirm('Are you sure you want to cancel this appointment?')">
+                    <button type="submit" class="btn btn-outline-danger w-100">
+                        <i class="bi bi-x-circle"></i> Cancel Appointment
+                    </button>
+                </form>
+                ` : ''}
+                
+                ${appointment.status === 'confirmed' ? `
+                <form action="/doctor/appointments/${appointment.id}/complete" method="POST" class="mb-2">
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Completion Notes</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Add any notes about the visit"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-info w-100">
+                        <i class="bi bi-check-all"></i> Mark as Completed
+                    </button>
+                </form>
+                <form action="/doctor/appointments/${appointment.id}/cancel" method="POST" onsubmit="return confirm('Are you sure you want to cancel this appointment?')">
+                    <button type="submit" class="btn btn-outline-danger w-100">
+                        <i class="bi bi-x-circle"></i> Cancel Appointment
+                    </button>
+                </form>
+                ` : ''}
+                
+                ${appointment.status === 'completed' ? `
+                <div class="alert alert-info mb-3">
+                    <i class="bi bi-check-circle"></i> This appointment has been completed.
+                </div>
+                <a href="/doctor/appointments/${appointment.id}/add-record" class="btn btn-primary w-100">
+                    <i class="bi bi-file-medical"></i> Add Medical Record
+                </a>
+                ` : ''}
+                
+                ${appointment.status === 'cancelled' ? `
+                <div class="alert alert-danger">
+                    <i class="bi bi-x-circle"></i> This appointment has been cancelled.
+                </div>
+                ` : ''}
+            </div>
+        </div>
+    </div>
+</div>
+` }) %>

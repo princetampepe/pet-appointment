@@ -1,0 +1,67 @@
+<%- include('../layouts/main', { body: `
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-people"></i> Staff Management</h2>
+    <a href="/secretary/staff/add" class="btn btn-primary">
+        <i class="bi bi-person-plus"></i> Add Staff Member
+    </a>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-heart-pulse text-primary"></i> Doctors (${doctors.length})</h5>
+            </div>
+            <div class="card-body">
+                ${doctors.length === 0 ? '<p class="text-muted text-center py-4">No doctors registered</p>' : ''}
+                <div class="list-group list-group-flush">
+                    ${doctors.map(doc => `
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                    <i class="bi bi-person"></i>
+                                </div>
+                                <div>
+                                    <strong>Dr. ${doc.first_name} ${doc.last_name}</strong><br>
+                                    <small class="text-muted">${doc.email}</small><br>
+                                    <small class="text-primary">${doc.specialization || 'General Practitioner'}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-person-workspace text-success"></i> Secretaries (${secretaries.length})</h5>
+            </div>
+            <div class="card-body">
+                ${secretaries.length === 0 ? '<p class="text-muted text-center py-4">No other secretaries</p>' : ''}
+                <div class="list-group list-group-flush">
+                    ${secretaries.map(sec => `
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                    <i class="bi bi-person"></i>
+                                </div>
+                                <div>
+                                    <strong>${sec.first_name} ${sec.last_name}</strong><br>
+                                    <small class="text-muted">${sec.email}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+` }) %>

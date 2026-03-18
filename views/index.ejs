@@ -1,0 +1,149 @@
+<%- include('layouts/main', { body: `
+<div class="hero-section text-center py-5 rounded-4 mb-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="container py-4">
+        <div class="mb-4">
+            <span class="badge bg-white text-primary px-3 py-2 mb-3" style="font-size: 0.9rem;">
+                <i class="bi bi-star-fill text-warning"></i> Trusted by 1000+ Pet Owners
+            </span>
+        </div>
+        <h1 class="display-3 fw-bold text-white mb-3">
+            <i class="bi bi-heart-pulse-fill"></i> PetCare Vet Clinic
+        </h1>
+        <p class="lead text-white opacity-75 mb-4 mx-auto" style="max-width: 600px;">
+            Professional veterinary care for your beloved pets. Book appointments, manage pet health records, and connect with expert doctors.
+        </p>
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <a href="/auth/register" class="btn btn-light btn-lg px-4 py-3 fw-bold">
+                <i class="bi bi-person-plus"></i> Get Started Free
+            </a>
+            <a href="/auth/login" class="btn btn-outline-light btn-lg px-4 py-3">
+                <i class="bi bi-box-arrow-in-right"></i> Sign In
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="text-center mb-5">
+    <h2 class="fw-bold mb-2">Why Choose PetCare?</h2>
+    <p class="text-muted">Everything you need to keep your furry friends healthy and happy</p>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm text-center">
+            <div class="card-body p-5">
+                <div class="feature-icon mb-4 mx-auto d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px;">
+                    <i class="bi bi-calendar-plus fs-2 text-white"></i>
+                </div>
+                <h5 class="card-title fw-bold">Easy Booking</h5>
+                <p class="card-text text-muted">Book appointments online anytime, anywhere. Choose your preferred doctor and time slot with just a few clicks.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm text-center">
+            <div class="card-body p-5">
+                <div class="feature-icon mb-4 mx-auto d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); border-radius: 20px;">
+                    <i class="bi bi-people fs-2 text-white"></i>
+                </div>
+                <h5 class="card-title fw-bold">Expert Doctors</h5>
+                <p class="card-text text-muted">Our team of experienced veterinarians are dedicated to providing the best care for your pets.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm text-center">
+            <div class="card-body p-5">
+                <div class="feature-icon mb-4 mx-auto d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%); border-radius: 20px;">
+                    <i class="bi bi-file-medical fs-2 text-white"></i>
+                </div>
+                <h5 class="card-title fw-bold">Medical Records</h5>
+                <p class="card-text text-muted">Keep all your pets' health information organized and accessible in one secure place.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row align-items-center mb-5 py-4">
+    <div class="col-lg-6 mb-4 mb-lg-0">
+        <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 mb-3">How It Works</span>
+        <h2 class="fw-bold mb-4">Get Started in 4 Simple Steps</h2>
+        
+        <div class="d-flex mb-4">
+            <div class="flex-shrink-0 me-3">
+                <div class="d-flex align-items-center justify-content-center text-white fw-bold" style="width: 48px; height: 48px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px;">1</div>
+            </div>
+            <div>
+                <h6 class="fw-bold mb-1">Create an Account</h6>
+                <p class="text-muted mb-0">Register with your email and set up your profile in minutes</p>
+            </div>
+        </div>
+        
+        <div class="d-flex mb-4">
+            <div class="flex-shrink-0 me-3">
+                <div class="d-flex align-items-center justify-content-center text-white fw-bold" style="width: 48px; height: 48px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px;">2</div>
+            </div>
+            <div>
+                <h6 class="fw-bold mb-1">Add Your Pets</h6>
+                <p class="text-muted mb-0">Register your furry friends with their essential information</p>
+            </div>
+        </div>
+        
+        <div class="d-flex mb-4">
+            <div class="flex-shrink-0 me-3">
+                <div class="d-flex align-items-center justify-content-center text-white fw-bold" style="width: 48px; height: 48px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px;">3</div>
+            </div>
+            <div>
+                <h6 class="fw-bold mb-1">Book an Appointment</h6>
+                <p class="text-muted mb-0">Choose a doctor, date, and time that works for you</p>
+            </div>
+        </div>
+        
+        <div class="d-flex">
+            <div class="flex-shrink-0 me-3">
+                <div class="d-flex align-items-center justify-content-center text-white fw-bold" style="width: 48px; height: 48px; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); border-radius: 12px;">
+                    <i class="bi bi-check-lg"></i>
+                </div>
+            </div>
+            <div>
+                <h6 class="fw-bold mb-1">Visit the Clinic</h6>
+                <p class="text-muted mb-0">Bring your pet for their scheduled appointment</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+            <div class="card-header text-white py-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <h5 class="mb-0"><i class="bi bi-clock"></i> Clinic Hours</h5>
+            </div>
+            <div class="card-body p-4">
+                <ul class="list-unstyled mb-0">
+                    <li class="d-flex justify-content-between align-items-center py-3 border-bottom">
+                        <span class="d-flex align-items-center">
+                            <i class="bi bi-calendar-week text-primary me-2"></i> Monday - Friday
+                        </span>
+                        <span class="badge bg-success px-3 py-2">9:00 AM - 5:00 PM</span>
+                    </li>
+                    <li class="d-flex justify-content-between align-items-center py-3 border-bottom">
+                        <span class="d-flex align-items-center">
+                            <i class="bi bi-calendar-week text-primary me-2"></i> Saturday
+                        </span>
+                        <span class="badge bg-info px-3 py-2">9:00 AM - 2:00 PM</span>
+                    </li>
+                    <li class="d-flex justify-content-between align-items-center py-3">
+                        <span class="d-flex align-items-center">
+                            <i class="bi bi-calendar-x text-muted me-2"></i> Sunday
+                        </span>
+                        <span class="badge bg-danger px-3 py-2">Closed</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-footer bg-light text-center py-3">
+                <a href="/auth/register" class="btn btn-primary px-4">
+                    <i class="bi bi-calendar-plus"></i> Book Your First Appointment
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+` }) %>

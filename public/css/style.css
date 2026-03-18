@@ -1,0 +1,520 @@
+/* Custom styles for PetCare Vet Clinic */
+
+:root {
+    --primary-color: #4f46e5;
+    --primary-dark: #4338ca;
+    --primary-light: #6366f1;
+    --secondary-color: #10b981;
+    --accent-color: #f59e0b;
+    --danger-color: #ef4444;
+    --info-color: #06b6d4;
+    --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --gradient-secondary: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+body {
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+main {
+    flex: 1;
+    padding-bottom: 2rem;
+}
+
+/* Navbar Styling */
+.navbar {
+    background: var(--gradient-primary) !important;
+    box-shadow: var(--shadow-lg);
+    padding: 0.75rem 0;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.4rem;
+    letter-spacing: -0.5px;
+}
+
+.navbar-brand i {
+    margin-right: 0.5rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.nav-link {
+    font-weight: 500;
+    padding: 0.5rem 1rem !important;
+    border-radius: 8px;
+    margin: 0 2px;
+    transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
+}
+
+.nav-link i {
+    margin-right: 0.35rem;
+}
+
+/* Card Styling */
+.card {
+    border-radius: 16px;
+    border: none;
+    background: #ffffff;
+    box-shadow: var(--shadow-md);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+}
+
+.card-header {
+    border-radius: 16px 16px 0 0 !important;
+    background: #ffffff;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 1.25rem 1.5rem;
+    font-weight: 600;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.card-footer {
+    background: #fafbfc;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 1rem 1.5rem;
+}
+
+/* Button Styling */
+.btn {
+    border-radius: 10px;
+    font-weight: 600;
+    padding: 0.6rem 1.25rem;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border: none;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-primary {
+    background: var(--gradient-primary);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+}
+
+.btn-success {
+    background: var(--gradient-secondary);
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #0d8b7f 0%, #2dd36f 100%);
+}
+
+.btn-outline-primary {
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.btn-outline-secondary {
+    border: 2px solid #6b7280;
+    color: #6b7280;
+    background: transparent;
+}
+
+.btn-outline-secondary:hover {
+    background: #6b7280;
+    color: white;
+}
+
+/* Form Styling */
+.form-control, .form-select {
+    border-radius: 10px;
+    border: 2px solid #e5e7eb;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+.form-label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #374151;
+}
+
+/* Badge Styling */
+.badge {
+    text-transform: capitalize;
+    font-weight: 600;
+    padding: 0.5em 0.85em;
+    border-radius: 8px;
+    font-size: 0.8rem;
+}
+
+.bg-warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%) !important;
+    color: #000 !important;
+}
+
+.bg-success {
+    background: var(--gradient-secondary) !important;
+}
+
+.bg-info {
+    background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%) !important;
+}
+
+.bg-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #f87171 100%) !important;
+}
+
+.bg-primary {
+    background: var(--gradient-primary) !important;
+}
+
+/* Table Styling */
+.table {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    background: white;
+}
+
+.table thead {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.table thead th {
+    border-bottom: none;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    color: #64748b;
+    padding: 1rem 1.25rem;
+}
+
+.table tbody td {
+    padding: 1rem 1.25rem;
+    vertical-align: middle;
+    border-color: #f1f5f9;
+}
+
+.table-hover tbody tr:hover {
+    background: linear-gradient(135deg, #f8fafc 0%, #fefefe 100%);
+}
+
+/* Alert Styling */
+.alert {
+    border-radius: 12px;
+    border: none;
+    padding: 1rem 1.25rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    color: #065f46;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    color: #991b1b;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+    color: #0c4a6e;
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e;
+}
+
+/* List Group Styling */
+.list-group-item {
+    border-left: 0;
+    border-right: 0;
+    padding: 1rem 1.25rem;
+    transition: all 0.2s ease;
+}
+
+.list-group-item:first-child {
+    border-top: 0;
+}
+
+.list-group-item:last-child {
+    border-bottom: 0;
+}
+
+.list-group-item:hover {
+    background: #f8fafc;
+}
+
+/* Pet Avatar */
+.pet-avatar {
+    font-size: 1.25rem;
+    background: var(--gradient-primary) !important;
+    box-shadow: var(--shadow-md);
+}
+
+/* Stats Cards */
+.stats-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 16px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: var(--shadow-md);
+    transition: all 0.3s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+}
+
+.stats-card h2, .stats-card h3 {
+    font-weight: 800;
+    margin-bottom: 0;
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 20px;
+    padding: 3rem;
+}
+
+/* Dropdown Styling */
+.dropdown-menu {
+    border-radius: 12px;
+    box-shadow: var(--shadow-xl);
+    border: none;
+    padding: 0.5rem;
+    animation: dropdownFade 0.2s ease;
+}
+
+@keyframes dropdownFade {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dropdown-item {
+    border-radius: 8px;
+    padding: 0.65rem 1rem;
+    font-weight: 500;
+    transition: all 0.15s ease;
+}
+
+.dropdown-item:hover {
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    transform: translateX(4px);
+}
+
+.dropdown-item i {
+    margin-right: 0.5rem;
+    width: 1.25rem;
+}
+
+/* Quick Action Cards */
+.quick-action {
+    padding: 1.5rem;
+    text-align: center;
+    border-radius: 16px;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.quick-action:hover {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    transform: translateY(-4px);
+}
+
+.quick-action i {
+    transition: all 0.3s ease;
+}
+
+.quick-action:hover i {
+    transform: scale(1.1);
+}
+
+/* Login/Register Pages */
+.auth-card {
+    max-width: 450px;
+    margin: 2rem auto;
+}
+
+/* Timeline for Medical Records */
+.timeline .card {
+    position: relative;
+}
+
+.timeline .card::before {
+    content: '';
+    position: absolute;
+    left: -12px;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+}
+
+/* Footer Styling */
+footer {
+    margin-top: auto;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    color: #94a3b8;
+    padding: 1.5rem 0;
+}
+
+footer a {
+    color: #cbd5e1;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+footer a:hover {
+    color: white;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+}
+
+/* Selection Color */
+::selection {
+    background: rgba(99, 102, 241, 0.2);
+    color: var(--primary-dark);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .card {
+        border-radius: 12px;
+    }
+    
+    .card:hover {
+        transform: none;
+    }
+    
+    .btn-group-sm .btn {
+        padding: 0.25rem 0.4rem;
+    }
+    
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+    
+    .hero-section {
+        padding: 2rem 1rem;
+        border-radius: 12px;
+    }
+}
+
+/* Loading Animation */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+    position: relative;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 24px;
+    height: 24px;
+    margin: -12px 0 0 -12px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Page Transitions */
+main {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
