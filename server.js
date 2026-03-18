@@ -2,6 +2,8 @@ const express = require('express');
 const session = require('express-session');
 const flash = require('connect-flash');
 const path = require('path');
+const db = require('./config/firebase');
+const FirestoreStore = require('firestore-store')(session);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -33,6 +35,7 @@ app.use(createRateLimiter({
 
 // Session configuration
 app.use(session({
+    store: new FirestoreStore({ database: db }),
     secret: process.env.SESSION_SECRET || 'dev-only-session-secret-change-me',
     resave: false,
     saveUninitialized: false,
