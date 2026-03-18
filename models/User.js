@@ -1,82 +1,93 @@
-const db = require('../config/database');
+const db = require('../config/firebase');
 const bcrypt = require('bcryptjs');
 
+const USERS = 'users';
+
 const User = {
-    create: (userData) => {
+    create: async (userData) => {
         const hashedPassword = bcrypt.hashSync(userData.password, 10);
-        const stmt = db.prepare(`
-            INSERT INTO users (email, password, first_name, last_name, phone, role, specialization, bio)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `);
-        const result = stmt.run(
-            userData.email,
-            hashedPassword,
-            userData.first_name,
-            userData.last_name,
-            userData.phone || null,
-            userData.role,
-            userData.specialization || null,
-            userData.bio || null
-        );
-        return result.lastInsertRowid;
+        const docRef = await db.collection(USERS).add({
+            email: userData.email,
+            password: hashedPassword,
+            first_name: userData.first_name,
+            last_name: userData.last_name,
+            phone: userData.phone || null,
+            role: userData.role,
+            specialization: userData.specialization || null,
+            bio: userData.bio || null,
+            created_at: new Date().toISOString()
+        });
+        return docRef.id;
     },
 
-    findByEmail: (email) => {
-        const stmt = db.prepare('SELECT * FROM users WHERE email = ?');
-        return stmt.get(email);
+    findByEmail: async (email) => {
+        const snapshot = await db.collection(USERS).where('email', '==', email).limit(1).get();
+        if (snapshot.empty) return null;
+        const doc = snapshot.docs[0];
+        return { id: doc.id, ...doc.data() };
     },
 
-    findById: (id) => {
-        const stmt = db.prepare('SELECT * FROM users WHERE id = ?');
-        return stmt.get(id);
+    findById: async (id) => {
+        const doc = await db.collection(USERS).doc(id).get();
+        if (!doc.exists) return null;
+        return { id: doc.id, ...doc.data() };
     },
 
-    findByRole: (role) => {
-        const stmt = db.prepare('SELECT * FROM users WHERE role = ?');
-        return stmt.all(role);
+    findByRole: async (role) => {
+        const snapshot = await db.collection(USERS).where('role', '==', role).get();
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     },
 
-    getAllDoctors: () => {
-        const stmt = db.prepare('SELECT id, first_name, last_name, specialization, bio FROM users WHERE role = ?');
-        return stmt.all('doctor');
+    getAllDoctors: async () => {
+        const snapshot = await db.collection(USERS).where('role', '==', 'doctor').get();
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            first_name: doc.data().first_name,
+            last_name: doc.data().last_name,
+            specialization: doc.data().specialization,
+            bio: doc.data().bio
+        }));
     },
 
     verifyPassword: (password, hashedPassword) => {
         return bcrypt.compareSync(password, hashedPassword);
     },
 
-    update: (id, userData) => {
-        const stmt = db.prepare(`
-            UPDATE users SET first_name = ?, last_name = ?, phone = ?, specialization = ?, bio = ?
-            WHERE id = ?
-        `);
-        return stmt.run(userData.first_name, userData.last_name, userData.phone, userData.specialization, userData.bio, id);
+    update: async (id, userData) => {
+        await db.collection(USERS).doc(id).update({
+            first_name: userData.first_name,
+            last_name: userData.last_name,
+            phone: userData.phone || null,
+            specialization: userData.specialization || null,
+            bio: userData.bio || null
+        });
     },
 
-    updatePassword: (id, newPassword) => {
+    updatePassword: async (id, newPassword) => {
         const hashedPassword = bcrypt.hashSync(newPassword, 10);
-        const stmt = db.prepare('UPDATE users SET password = ? WHERE id = ?');
-        return stmt.run(hashedPassword, id);
+        await db.collection(USERS).doc(id).update({ password: hashedPassword });
     },
 
-    // Doctor availability methods
-    getAvailability: (doctorId) => {
-        const stmt = db.prepare('SELECT * FROM doctor_availability WHERE doctor_id = ? ORDER BY day_of_week');
-        return stmt.all(doctorId);
+    getAvailability: async (doctorId) => {
+        const snapshot = await db.collection(USERS).doc(doctorId).collection('availability').get();
+        const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return docs.sort((a, b) => a.day_of_week - b.day_of_week);
     },
 
-    setAvailability: (doctorId, dayOfWeek, startTime, endTime, isAvailable) => {
-        const stmt = db.prepare(`
-            INSERT OR REPLACE INTO doctor_availability (doctor_id, day_of_week, start_time, end_time, is_available)
-            VALUES (?, ?, ?, ?, ?)
-        `);
-        return stmt.run(doctorId, dayOfWeek, startTime, endTime, isAvailable ? 1 : 0);
+    setAvailability: async (doctorId, dayOfWeek, startTime, endTime, isAvailable) => {
+        await db.collection(USERS).doc(doctorId).collection('availability').doc(String(dayOfWeek)).set({
+            doctor_id: doctorId,
+            day_of_week: dayOfWeek,
+            start_time: startTime,
+            end_time: endTime,
+            is_available: isAvailable ? 1 : 0
+        });
     },
 
-    getDoctorWithAvailability: (doctorId) => {
-        const doctor = User.findById(doctorId);
+    getDoctorWithAvailability: async (doctorId) => {
+        const doctor = await User.findById(doctorId);
         if (doctor) {
-            doctor.availability = User.getAvailability(doctorId);
+            doctor.availability = await User.getAvailability(doctorId);
         }
         return doctor;
     }

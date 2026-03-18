@@ -7,20 +7,20 @@ const Appointment = require('../models/Appointment');
 const User = require('../models/User');
 const MedicalRecord = require('../models/MedicalRecord');
 
-// Apply middleware to all routes
 router.use(isAuthenticated, isPatient);
 
-// Patient Dashboard
-router.get('/dashboard', (req, res) => {
-    const pets = Pet.findByOwnerId(req.session.user.id);
-    const appointments = Appointment.findByPatientId(req.session.user.id);
-    
+// Dashboard
+router.get('/dashboard', async (req, res) => {
+    const [pets, appointments] = await Promise.all([
+        Pet.findByOwnerId(req.session.user.id),
+        Appointment.findByPatientId(req.session.user.id)
+    ]);
     res.render('patient/dashboard', { pets, appointments });
 });
 
-// Pets Management
-router.get('/pets', (req, res) => {
-    const pets = Pet.findByOwnerId(req.session.user.id);
+// Pets
+router.get('/pets', async (req, res) => {
+    const pets = await Pet.findByOwnerId(req.session.user.id);
     res.render('patient/pets', { pets });
 });
 
@@ -31,7 +31,7 @@ router.get('/pets/add', (req, res) => {
 router.post('/pets/add', [
     body('name').notEmpty().withMessage('Pet name is required'),
     body('species').notEmpty().withMessage('Species is required')
-], (req, res) => {
+], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         req.flash('error_msg', errors.array()[0].msg);
@@ -39,18 +39,8 @@ router.post('/pets/add', [
     }
 
     const { name, species, breed, age, weight, notes } = req.body;
-
     try {
-        Pet.create({
-            owner_id: req.session.user.id,
-            name,
-            species,
-            breed,
-            age: age || null,
-            weight: weight || null,
-            notes
-        });
-
+        await Pet.create({ owner_id: req.session.user.id, name, species, breed, age: age || null, weight: weight || null, notes });
         req.flash('success_msg', 'Pet added successfully!');
         res.redirect('/patient/pets');
     } catch (error) {
@@ -60,29 +50,25 @@ router.post('/pets/add', [
     }
 });
 
-router.get('/pets/edit/:id', (req, res) => {
-    const pet = Pet.findById(req.params.id);
-    
+router.get('/pets/edit/:id', async (req, res) => {
+    const pet = await Pet.findById(req.params.id);
     if (!pet || pet.owner_id !== req.session.user.id) {
         req.flash('error_msg', 'Pet not found');
         return res.redirect('/patient/pets');
     }
-
     res.render('patient/edit-pet', { pet });
 });
 
-router.post('/pets/edit/:id', (req, res) => {
-    const pet = Pet.findById(req.params.id);
-    
+router.post('/pets/edit/:id', async (req, res) => {
+    const pet = await Pet.findById(req.params.id);
     if (!pet || pet.owner_id !== req.session.user.id) {
         req.flash('error_msg', 'Pet not found');
         return res.redirect('/patient/pets');
     }
 
     const { name, species, breed, age, weight, notes } = req.body;
-
     try {
-        Pet.update(req.params.id, { name, species, breed, age, weight, notes });
+        await Pet.update(req.params.id, { name, species, breed, age, weight, notes });
         req.flash('success_msg', 'Pet updated successfully!');
         res.redirect('/patient/pets');
     } catch (error) {
@@ -92,16 +78,15 @@ router.post('/pets/edit/:id', (req, res) => {
     }
 });
 
-router.post('/pets/delete/:id', (req, res) => {
-    const pet = Pet.findById(req.params.id);
-    
+router.post('/pets/delete/:id', async (req, res) => {
+    const pet = await Pet.findById(req.params.id);
     if (!pet || pet.owner_id !== req.session.user.id) {
         req.flash('error_msg', 'Pet not found');
         return res.redirect('/patient/pets');
     }
 
     try {
-        Pet.delete(req.params.id);
+        await Pet.delete(req.params.id);
         req.flash('success_msg', 'Pet removed successfully');
         res.redirect('/patient/pets');
     } catch (error) {
@@ -112,14 +97,16 @@ router.post('/pets/delete/:id', (req, res) => {
 });
 
 // Appointments
-router.get('/appointments', (req, res) => {
-    const appointments = Appointment.findByPatientId(req.session.user.id);
+router.get('/appointments', async (req, res) => {
+    const appointments = await Appointment.findByPatientId(req.session.user.id);
     res.render('patient/appointments', { appointments });
 });
 
-router.get('/appointments/book', (req, res) => {
-    const pets = Pet.findByOwnerId(req.session.user.id);
-    const doctors = User.getAllDoctors();
+router.get('/appointments/book', async (req, res) => {
+    const [pets, doctors] = await Promise.all([
+        Pet.findByOwnerId(req.session.user.id),
+        User.getAllDoctors()
+    ]);
     res.render('patient/book-appointment', { pets, doctors });
 });
 
@@ -129,7 +116,7 @@ router.post('/appointments/book', [
     body('appointment_date').notEmpty().withMessage('Please select a date'),
     body('appointment_time').notEmpty().withMessage('Please select a time'),
     body('reason').notEmpty().withMessage('Please provide a reason for the visit')
-], (req, res) => {
+], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         req.flash('error_msg', errors.array()[0].msg);
@@ -138,33 +125,32 @@ router.post('/appointments/book', [
 
     const { pet_id, doctor_id, appointment_date, appointment_time, reason, notes } = req.body;
 
-    // Verify pet belongs to patient
-    const pet = Pet.findById(pet_id);
+    const pet = await Pet.findById(pet_id);
     if (!pet || pet.owner_id !== req.session.user.id) {
         req.flash('error_msg', 'Invalid pet selection');
         return res.redirect('/patient/appointments/book');
     }
 
-    // Check if time slot is available
-    const existingAppointments = Appointment.findByDateAndDoctor(appointment_date, doctor_id);
-    const isSlotTaken = existingAppointments.some(apt => apt.appointment_time === appointment_time);
-    
-    if (isSlotTaken) {
+    const existingAppointments = await Appointment.findByDateAndDoctor(appointment_date, doctor_id);
+    if (existingAppointments.some(apt => apt.appointment_time === appointment_time)) {
         req.flash('error_msg', 'This time slot is already booked. Please choose another time.');
         return res.redirect('/patient/appointments/book');
     }
 
+    const doctor = await User.findById(doctor_id);
     try {
-        Appointment.create({
-            pet_id,
-            patient_id: req.session.user.id,
-            doctor_id,
-            appointment_date,
-            appointment_time,
-            reason,
-            notes
+        await Appointment.create({
+            pet_id, patient_id: req.session.user.id, doctor_id,
+            appointment_date, appointment_time, reason, notes,
+            pet_name: pet.name, pet_species: pet.species, pet_breed: pet.breed || null,
+            patient_first_name: req.session.user.first_name,
+            patient_last_name: req.session.user.last_name,
+            patient_phone: req.session.user.phone || null,
+            patient_email: req.session.user.email,
+            doctor_first_name: doctor.first_name,
+            doctor_last_name: doctor.last_name,
+            doctor_specialization: doctor.specialization || null
         });
-
         req.flash('success_msg', 'Appointment booked successfully! Please wait for confirmation.');
         res.redirect('/patient/appointments');
     } catch (error) {
@@ -174,21 +160,19 @@ router.post('/appointments/book', [
     }
 });
 
-router.post('/appointments/cancel/:id', (req, res) => {
-    const appointment = Appointment.findById(req.params.id);
-    
+router.post('/appointments/cancel/:id', async (req, res) => {
+    const appointment = await Appointment.findById(req.params.id);
     if (!appointment || appointment.patient_id !== req.session.user.id) {
         req.flash('error_msg', 'Appointment not found');
         return res.redirect('/patient/appointments');
     }
-
     if (appointment.status === 'completed') {
         req.flash('error_msg', 'Cannot cancel a completed appointment');
         return res.redirect('/patient/appointments');
     }
 
     try {
-        Appointment.updateStatus(req.params.id, 'cancelled');
+        await Appointment.updateStatus(req.params.id, 'cancelled');
         req.flash('success_msg', 'Appointment cancelled successfully');
         res.redirect('/patient/appointments');
     } catch (error) {
@@ -198,94 +182,76 @@ router.post('/appointments/cancel/:id', (req, res) => {
     }
 });
 
-// API endpoint to get available time slots
-router.get('/api/available-slots', (req, res) => {
+// Available time slots API
+router.get('/api/available-slots', async (req, res) => {
     const { date, doctor_id } = req.query;
-    
-    if (!date || !doctor_id) {
-        return res.json({ error: 'Date and doctor are required' });
-    }
+    if (!date || !doctor_id) return res.json({ error: 'Date and doctor are required' });
 
-    const bookedSlots = Appointment.findByDateAndDoctor(date, doctor_id);
+    const [bookedSlots, availability] = await Promise.all([
+        Appointment.findByDateAndDoctor(date, doctor_id),
+        User.getAvailability(doctor_id)
+    ]);
+
     const bookedTimes = bookedSlots.map(apt => apt.appointment_time);
-
-    // Check doctor availability for this day
     const dayOfWeek = new Date(date).getDay();
-    const availability = User.getAvailability(doctor_id);
     const dayAvail = availability.find(a => a.day_of_week === dayOfWeek);
-    
-    let startHour = 9;
-    let endHour = 17;
-    
+
+    let startHour = 9, endHour = 17;
     if (dayAvail) {
-        if (!dayAvail.is_available) {
-            return res.json({ availableSlots: [], message: 'Doctor not available on this day' });
-        }
+        if (!dayAvail.is_available) return res.json({ availableSlots: [], message: 'Doctor not available on this day' });
         startHour = parseInt(dayAvail.start_time.split(':')[0]);
         endHour = parseInt(dayAvail.end_time.split(':')[0]);
     }
 
-    // Available time slots based on doctor's schedule
     const allSlots = [];
     for (let hour = startHour; hour < endHour; hour++) {
         allSlots.push(`${hour.toString().padStart(2, '0')}:00`);
         allSlots.push(`${hour.toString().padStart(2, '0')}:30`);
     }
 
-    const availableSlots = allSlots.filter(slot => !bookedTimes.includes(slot));
-    res.json({ availableSlots });
+    res.json({ availableSlots: allSlots.filter(slot => !bookedTimes.includes(slot)) });
 });
 
-// Reschedule appointment
-router.get('/appointments/reschedule/:id', (req, res) => {
-    const appointment = Appointment.findById(req.params.id);
-    
+// Reschedule
+router.get('/appointments/reschedule/:id', async (req, res) => {
+    const appointment = await Appointment.findById(req.params.id);
     if (!appointment || appointment.patient_id !== req.session.user.id) {
         req.flash('error_msg', 'Appointment not found');
         return res.redirect('/patient/appointments');
     }
-
     if (appointment.status === 'completed' || appointment.status === 'cancelled') {
         req.flash('error_msg', 'Cannot reschedule this appointment');
         return res.redirect('/patient/appointments');
     }
-
-    const doctors = User.getAllDoctors();
+    const doctors = await User.getAllDoctors();
     res.render('patient/reschedule', { appointment, doctors });
 });
 
 router.post('/appointments/reschedule/:id', [
     body('appointment_date').notEmpty().withMessage('Please select a date'),
     body('appointment_time').notEmpty().withMessage('Please select a time')
-], (req, res) => {
+], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         req.flash('error_msg', errors.array()[0].msg);
         return res.redirect(`/patient/appointments/reschedule/${req.params.id}`);
     }
 
-    const appointment = Appointment.findById(req.params.id);
-    
+    const appointment = await Appointment.findById(req.params.id);
     if (!appointment || appointment.patient_id !== req.session.user.id) {
         req.flash('error_msg', 'Appointment not found');
         return res.redirect('/patient/appointments');
     }
 
     const { appointment_date, appointment_time } = req.body;
-
-    // Check if new time slot is available
-    const existingAppointments = Appointment.findByDateAndDoctor(appointment_date, appointment.doctor_id);
-    const isSlotTaken = existingAppointments.some(apt => 
-        apt.appointment_time === appointment_time && apt.id !== parseInt(req.params.id)
-    );
-    
-    if (isSlotTaken) {
+    const existingAppointments = await Appointment.findByDateAndDoctor(appointment_date, appointment.doctor_id);
+    if (existingAppointments.some(apt => apt.appointment_time === appointment_time && apt.id !== req.params.id)) {
         req.flash('error_msg', 'This time slot is already booked. Please choose another time.');
         return res.redirect(`/patient/appointments/reschedule/${req.params.id}`);
     }
 
     try {
-        Appointment.reschedule(req.params.id, appointment_date, appointment_time);
+        await Appointment.reschedule(req.params.id, appointment_date, appointment_time);
         req.flash('success_msg', 'Appointment rescheduled successfully!');
         res.redirect('/patient/appointments');
     } catch (error) {
@@ -295,16 +261,14 @@ router.post('/appointments/reschedule/:id', [
     }
 });
 
-// View pet medical records
-router.get('/pets/:id/records', (req, res) => {
-    const pet = Pet.findById(req.params.id);
-    
+// Pet medical records
+router.get('/pets/:id/records', async (req, res) => {
+    const pet = await Pet.findById(req.params.id);
     if (!pet || pet.owner_id !== req.session.user.id) {
         req.flash('error_msg', 'Pet not found');
         return res.redirect('/patient/pets');
     }
-
-    const records = MedicalRecord.findByPetId(req.params.id);
+    const records = await MedicalRecord.findByPetId(req.params.id);
     res.render('patient/pet-records', { pet, records });
 });
 

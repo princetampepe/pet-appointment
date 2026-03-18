@@ -5,3 +5,4 @@ database.sqlite
 .env
 .env.local
 .DS_Store
+serviceAccountKey.json

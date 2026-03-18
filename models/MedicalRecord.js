@@ -1,88 +1,65 @@
-const db = require('../config/database');
+const db = require('../config/firebase');
+
+const RECORDS = 'medical_records';
 
 const MedicalRecord = {
-    create: (recordData) => {
-        const stmt = db.prepare(`
-            INSERT INTO medical_records (pet_id, appointment_id, doctor_id, record_date, diagnosis, treatment, prescription, notes)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `);
-        const result = stmt.run(
-            recordData.pet_id,
-            recordData.appointment_id || null,
-            recordData.doctor_id,
-            recordData.record_date,
-            recordData.diagnosis || null,
-            recordData.treatment || null,
-            recordData.prescription || null,
-            recordData.notes || null
-        );
-        return result.lastInsertRowid;
+    create: async (data) => {
+        const docRef = await db.collection(RECORDS).add({
+            pet_id: data.pet_id,
+            appointment_id: data.appointment_id || null,
+            doctor_id: data.doctor_id,
+            record_date: data.record_date,
+            diagnosis: data.diagnosis || null,
+            treatment: data.treatment || null,
+            prescription: data.prescription || null,
+            notes: data.notes || null,
+            pet_name: data.pet_name || null,
+            pet_species: data.pet_species || null,
+            doctor_first_name: data.doctor_first_name || null,
+            doctor_last_name: data.doctor_last_name || null,
+            owner_first_name: data.owner_first_name || null,
+            owner_last_name: data.owner_last_name || null,
+            created_at: new Date().toISOString()
+        });
+        return docRef.id;
     },
 
-    findById: (id) => {
-        const stmt = db.prepare(`
-            SELECT mr.*, 
-                   p.name as pet_name, p.species as pet_species,
-                   d.first_name as doctor_first_name, d.last_name as doctor_last_name
-            FROM medical_records mr
-            JOIN pets p ON mr.pet_id = p.id
-            JOIN users d ON mr.doctor_id = d.id
-            WHERE mr.id = ?
-        `);
-        return stmt.get(id);
+    findById: async (id) => {
+        const doc = await db.collection(RECORDS).doc(id).get();
+        if (!doc.exists) return null;
+        return { id: doc.id, ...doc.data() };
     },
 
-    findByPetId: (petId) => {
-        const stmt = db.prepare(`
-            SELECT mr.*, 
-                   d.first_name as doctor_first_name, d.last_name as doctor_last_name
-            FROM medical_records mr
-            JOIN users d ON mr.doctor_id = d.id
-            WHERE mr.pet_id = ?
-            ORDER BY mr.record_date DESC, mr.created_at DESC
-        `);
-        return stmt.all(petId);
+    findByPetId: async (petId) => {
+        const snapshot = await db.collection(RECORDS).where('pet_id', '==', petId).get();
+        const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return docs.sort((a, b) => b.record_date.localeCompare(a.record_date));
     },
 
-    findByAppointmentId: (appointmentId) => {
-        const stmt = db.prepare(`
-            SELECT mr.*, 
-                   p.name as pet_name,
-                   d.first_name as doctor_first_name, d.last_name as doctor_last_name
-            FROM medical_records mr
-            JOIN pets p ON mr.pet_id = p.id
-            JOIN users d ON mr.doctor_id = d.id
-            WHERE mr.appointment_id = ?
-        `);
-        return stmt.get(appointmentId);
+    findByAppointmentId: async (appointmentId) => {
+        const snapshot = await db.collection(RECORDS).where('appointment_id', '==', appointmentId).limit(1).get();
+        if (snapshot.empty) return null;
+        const doc = snapshot.docs[0];
+        return { id: doc.id, ...doc.data() };
     },
 
-    findByDoctorId: (doctorId) => {
-        const stmt = db.prepare(`
-            SELECT mr.*, 
-                   p.name as pet_name, p.species as pet_species,
-                   o.first_name as owner_first_name, o.last_name as owner_last_name
-            FROM medical_records mr
-            JOIN pets p ON mr.pet_id = p.id
-            JOIN users o ON p.owner_id = o.id
-            WHERE mr.doctor_id = ?
-            ORDER BY mr.record_date DESC
-        `);
-        return stmt.all(doctorId);
+    findByDoctorId: async (doctorId) => {
+        const snapshot = await db.collection(RECORDS).where('doctor_id', '==', doctorId).get();
+        const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return docs.sort((a, b) => b.record_date.localeCompare(a.record_date));
     },
 
-    update: (id, recordData) => {
-        const stmt = db.prepare(`
-            UPDATE medical_records 
-            SET diagnosis = ?, treatment = ?, prescription = ?, notes = ?
-            WHERE id = ?
-        `);
-        return stmt.run(recordData.diagnosis, recordData.treatment, recordData.prescription, recordData.notes, id);
+    update: async (id, data) => {
+        await db.collection(RECORDS).doc(id).update({
+            diagnosis: data.diagnosis,
+            treatment: data.treatment,
+            prescription: data.prescription,
+            notes: data.notes
+        });
     },
 
-    delete: (id) => {
-        const stmt = db.prepare('DELETE FROM medical_records WHERE id = ?');
-        return stmt.run(id);
+    delete: async (id) => {
+        await db.collection(RECORDS).doc(id).delete();
     }
 };
 

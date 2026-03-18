@@ -1,44 +1,46 @@
-const db = require('../config/database');
+const db = require('../config/firebase');
+
+const PETS = 'pets';
 
 const Pet = {
-    create: (petData) => {
-        const stmt = db.prepare(`
-            INSERT INTO pets (owner_id, name, species, breed, age, weight, notes)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        `);
-        const result = stmt.run(
-            petData.owner_id,
-            petData.name,
-            petData.species,
-            petData.breed || null,
-            petData.age || null,
-            petData.weight || null,
-            petData.notes || null
-        );
-        return result.lastInsertRowid;
+    create: async (petData) => {
+        const docRef = await db.collection(PETS).add({
+            owner_id: petData.owner_id,
+            name: petData.name,
+            species: petData.species,
+            breed: petData.breed || null,
+            age: petData.age || null,
+            weight: petData.weight || null,
+            notes: petData.notes || null,
+            created_at: new Date().toISOString()
+        });
+        return docRef.id;
     },
 
-    findById: (id) => {
-        const stmt = db.prepare('SELECT * FROM pets WHERE id = ?');
-        return stmt.get(id);
+    findById: async (id) => {
+        const doc = await db.collection(PETS).doc(id).get();
+        if (!doc.exists) return null;
+        return { id: doc.id, ...doc.data() };
     },
 
-    findByOwnerId: (ownerId) => {
-        const stmt = db.prepare('SELECT * FROM pets WHERE owner_id = ?');
-        return stmt.all(ownerId);
+    findByOwnerId: async (ownerId) => {
+        const snapshot = await db.collection(PETS).where('owner_id', '==', ownerId).get();
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     },
 
-    update: (id, petData) => {
-        const stmt = db.prepare(`
-            UPDATE pets SET name = ?, species = ?, breed = ?, age = ?, weight = ?, notes = ?
-            WHERE id = ?
-        `);
-        return stmt.run(petData.name, petData.species, petData.breed, petData.age, petData.weight, petData.notes, id);
+    update: async (id, petData) => {
+        await db.collection(PETS).doc(id).update({
+            name: petData.name,
+            species: petData.species,
+            breed: petData.breed || null,
+            age: petData.age || null,
+            weight: petData.weight || null,
+            notes: petData.notes || null
+        });
     },
 
-    delete: (id) => {
-        const stmt = db.prepare('DELETE FROM pets WHERE id = ?');
-        return stmt.run(id);
+    delete: async (id) => {
+        await db.collection(PETS).doc(id).delete();
     }
 };
 

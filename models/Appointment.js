@@ -1,171 +1,112 @@
-const db = require('../config/database');
+const db = require('../config/firebase');
+
+const APPOINTMENTS = 'appointments';
 
 const Appointment = {
-    create: (appointmentData) => {
-        const stmt = db.prepare(`
-            INSERT INTO appointments (pet_id, patient_id, doctor_id, appointment_date, appointment_time, reason, notes)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        `);
-        const result = stmt.run(
-            appointmentData.pet_id,
-            appointmentData.patient_id,
-            appointmentData.doctor_id,
-            appointmentData.appointment_date,
-            appointmentData.appointment_time,
-            appointmentData.reason,
-            appointmentData.notes || null
-        );
-        return result.lastInsertRowid;
+    create: async (data) => {
+        const docRef = await db.collection(APPOINTMENTS).add({
+            pet_id: data.pet_id,
+            patient_id: data.patient_id,
+            doctor_id: data.doctor_id,
+            appointment_date: data.appointment_date,
+            appointment_time: data.appointment_time,
+            reason: data.reason,
+            status: 'pending',
+            notes: data.notes || null,
+            pet_name: data.pet_name || null,
+            pet_species: data.pet_species || null,
+            pet_breed: data.pet_breed || null,
+            patient_first_name: data.patient_first_name || null,
+            patient_last_name: data.patient_last_name || null,
+            patient_phone: data.patient_phone || null,
+            patient_email: data.patient_email || null,
+            doctor_first_name: data.doctor_first_name || null,
+            doctor_last_name: data.doctor_last_name || null,
+            doctor_specialization: data.doctor_specialization || null,
+            created_at: new Date().toISOString()
+        });
+        return docRef.id;
     },
 
-    findById: (id) => {
-        const stmt = db.prepare(`
-            SELECT a.*, 
-                   p.name as pet_name, p.species as pet_species, p.breed as pet_breed,
-                   pt.first_name as patient_first_name, pt.last_name as patient_last_name, pt.phone as patient_phone, pt.email as patient_email,
-                   d.first_name as doctor_first_name, d.last_name as doctor_last_name, d.specialization as doctor_specialization
-            FROM appointments a
-            JOIN pets p ON a.pet_id = p.id
-            JOIN users pt ON a.patient_id = pt.id
-            JOIN users d ON a.doctor_id = d.id
-            WHERE a.id = ?
-        `);
-        return stmt.get(id);
+    findById: async (id) => {
+        const doc = await db.collection(APPOINTMENTS).doc(id).get();
+        if (!doc.exists) return null;
+        return { id: doc.id, ...doc.data() };
     },
 
-    findByPatientId: (patientId) => {
-        const stmt = db.prepare(`
-            SELECT a.*, 
-                   p.name as pet_name, p.species as pet_species,
-                   d.first_name as doctor_first_name, d.last_name as doctor_last_name
-            FROM appointments a
-            JOIN pets p ON a.pet_id = p.id
-            JOIN users d ON a.doctor_id = d.id
-            WHERE a.patient_id = ?
-            ORDER BY a.appointment_date DESC, a.appointment_time DESC
-        `);
-        return stmt.all(patientId);
+    findByPatientId: async (patientId) => {
+        const snapshot = await db.collection(APPOINTMENTS).where('patient_id', '==', patientId).get();
+        const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return docs.sort((a, b) => b.appointment_date.localeCompare(a.appointment_date));
     },
 
-    findByDoctorId: (doctorId) => {
-        const stmt = db.prepare(`
-            SELECT a.*, 
-                   p.name as pet_name, p.species as pet_species, p.breed as pet_breed,
-                   pt.first_name as patient_first_name, pt.last_name as patient_last_name, pt.phone as patient_phone
-            FROM appointments a
-            JOIN pets p ON a.pet_id = p.id
-            JOIN users pt ON a.patient_id = pt.id
-            WHERE a.doctor_id = ?
-            ORDER BY a.appointment_date ASC, a.appointment_time ASC
-        `);
-        return stmt.all(doctorId);
+    findByDoctorId: async (doctorId) => {
+        const snapshot = await db.collection(APPOINTMENTS).where('doctor_id', '==', doctorId).get();
+        const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return docs.sort((a, b) => a.appointment_date.localeCompare(b.appointment_date));
     },
 
-    findPendingByDoctorId: (doctorId) => {
-        const stmt = db.prepare(`
-            SELECT a.*, 
-                   p.name as pet_name, p.species as pet_species, p.breed as pet_breed,
-                   pt.first_name as patient_first_name, pt.last_name as patient_last_name, pt.phone as patient_phone
-            FROM appointments a
-            JOIN pets p ON a.pet_id = p.id
-            JOIN users pt ON a.patient_id = pt.id
-            WHERE a.doctor_id = ? AND a.status = 'pending'
-            ORDER BY a.appointment_date ASC, a.appointment_time ASC
-        `);
-        return stmt.all(doctorId);
+    findPendingByDoctorId: async (doctorId) => {
+        const snapshot = await db.collection(APPOINTMENTS).where('doctor_id', '==', doctorId).get();
+        const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return docs
+            .filter(d => d.status === 'pending')
+            .sort((a, b) => a.appointment_date.localeCompare(b.appointment_date));
     },
 
-    findAll: () => {
-        const stmt = db.prepare(`
-            SELECT a.*, 
-                   p.name as pet_name, p.species as pet_species,
-                   pt.first_name as patient_first_name, pt.last_name as patient_last_name, pt.phone as patient_phone,
-                   d.first_name as doctor_first_name, d.last_name as doctor_last_name
-            FROM appointments a
-            JOIN pets p ON a.pet_id = p.id
-            JOIN users pt ON a.patient_id = pt.id
-            JOIN users d ON a.doctor_id = d.id
-            ORDER BY a.appointment_date DESC, a.appointment_time DESC
-        `);
-        return stmt.all();
+    findAll: async () => {
+        const snapshot = await db.collection(APPOINTMENTS).get();
+        const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return docs.sort((a, b) => b.appointment_date.localeCompare(a.appointment_date));
     },
 
-    findByStatus: (status) => {
-        const stmt = db.prepare(`
-            SELECT a.*, 
-                   p.name as pet_name, p.species as pet_species,
-                   pt.first_name as patient_first_name, pt.last_name as patient_last_name, pt.phone as patient_phone,
-                   d.first_name as doctor_first_name, d.last_name as doctor_last_name
-            FROM appointments a
-            JOIN pets p ON a.pet_id = p.id
-            JOIN users pt ON a.patient_id = pt.id
-            JOIN users d ON a.doctor_id = d.id
-            WHERE a.status = ?
-            ORDER BY a.appointment_date ASC, a.appointment_time ASC
-        `);
-        return stmt.all(status);
+    findByStatus: async (status) => {
+        const snapshot = await db.collection(APPOINTMENTS).where('status', '==', status).get();
+        const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return docs.sort((a, b) => a.appointment_date.localeCompare(b.appointment_date));
     },
 
-    findByDateAndDoctor: (date, doctorId) => {
-        const stmt = db.prepare(`
-            SELECT appointment_time FROM appointments 
-            WHERE appointment_date = ? AND doctor_id = ? AND status != 'cancelled'
-        `);
-        return stmt.all(date, doctorId);
+    findByDateAndDoctor: async (date, doctorId) => {
+        const snapshot = await db.collection(APPOINTMENTS).where('doctor_id', '==', doctorId).get();
+        const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return docs.filter(d => d.appointment_date === date && d.status !== 'cancelled');
     },
 
-    updateStatus: (id, status, notes = null) => {
-        const stmt = db.prepare(`
-            UPDATE appointments SET status = ?, notes = COALESCE(?, notes)
-            WHERE id = ?
-        `);
-        return stmt.run(status, notes, id);
+    updateStatus: async (id, status, notes = null) => {
+        const update = { status };
+        if (notes) update.notes = notes;
+        await db.collection(APPOINTMENTS).doc(id).update(update);
     },
 
-    delete: (id) => {
-        const stmt = db.prepare('DELETE FROM appointments WHERE id = ?');
-        return stmt.run(id);
+    delete: async (id) => {
+        await db.collection(APPOINTMENTS).doc(id).delete();
     },
 
-    reschedule: (id, newDate, newTime) => {
-        const stmt = db.prepare(`
-            UPDATE appointments SET appointment_date = ?, appointment_time = ?, status = 'pending'
-            WHERE id = ?
-        `);
-        return stmt.run(newDate, newTime, id);
+    reschedule: async (id, newDate, newTime) => {
+        await db.collection(APPOINTMENTS).doc(id).update({
+            appointment_date: newDate,
+            appointment_time: newTime,
+            status: 'pending'
+        });
     },
 
-    getStats: () => {
-        const totalStmt = db.prepare('SELECT COUNT(*) as count FROM appointments');
-        const pendingStmt = db.prepare("SELECT COUNT(*) as count FROM appointments WHERE status = 'pending'");
-        const confirmedStmt = db.prepare("SELECT COUNT(*) as count FROM appointments WHERE status = 'confirmed'");
-        const completedStmt = db.prepare("SELECT COUNT(*) as count FROM appointments WHERE status = 'completed'");
-        const cancelledStmt = db.prepare("SELECT COUNT(*) as count FROM appointments WHERE status = 'cancelled'");
-        
+    getStats: async () => {
+        const snapshot = await db.collection(APPOINTMENTS).get();
+        const docs = snapshot.docs.map(doc => doc.data());
         return {
-            total: totalStmt.get().count,
-            pending: pendingStmt.get().count,
-            confirmed: confirmedStmt.get().count,
-            completed: completedStmt.get().count,
-            cancelled: cancelledStmt.get().count
+            total: docs.length,
+            pending: docs.filter(d => d.status === 'pending').length,
+            confirmed: docs.filter(d => d.status === 'confirmed').length,
+            completed: docs.filter(d => d.status === 'completed').length,
+            cancelled: docs.filter(d => d.status === 'cancelled').length
         };
     },
 
-    getTodayAppointments: () => {
+    getTodayAppointments: async () => {
         const today = new Date().toISOString().split('T')[0];
-        const stmt = db.prepare(`
-            SELECT a.*, 
-                   p.name as pet_name, p.species as pet_species,
-                   pt.first_name as patient_first_name, pt.last_name as patient_last_name,
-                   d.first_name as doctor_first_name, d.last_name as doctor_last_name
-            FROM appointments a
-            JOIN pets p ON a.pet_id = p.id
-            JOIN users pt ON a.patient_id = pt.id
-            JOIN users d ON a.doctor_id = d.id
-            WHERE a.appointment_date = ?
-            ORDER BY a.appointment_time ASC
-        `);
-        return stmt.all(today);
+        const snapshot = await db.collection(APPOINTMENTS).where('appointment_date', '==', today).get();
+        const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return docs.sort((a, b) => a.appointment_time.localeCompare(b.appointment_time));
     }
 };
 
